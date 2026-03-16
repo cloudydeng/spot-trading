@@ -1,0 +1,17 @@
+[Unit]
+Description=Spot Trading Service
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ec2-user
+WorkingDirectory=/opt/spot-trading
+EnvironmentFile=/opt/spot-trading/app.env
+ExecStart=/usr/bin/java -XX:+UseG1GC -XX:MaxRAMPercentage=75 -jar /opt/spot-trading/app.jar
+SuccessExitStatus=143
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

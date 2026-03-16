@@ -3,62 +3,12 @@ server:
 
 spring:
   application:
-    name: user-service
+    name: spot-trading
   main:
     banner-mode: off
   autoconfigure:
     exclude:
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+      - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
       - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
       - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
-
-# JWT 配置
-jwt:
-  secret: match-engine-secret-key-change-in-production-very-long-secret-key
-  access-token-expiration: 7200     # 2 小时（秒）
-  refresh-token-expiration: 604800  # 7 天（秒）
-
-# 密码配置
-password:
-  min-length: 8
-  max-length: 32
-  require-uppercase: true
-  require-lowercase: true
-  require-digit: true
-  require-special-char: false
-  bcrypt-strength: 12
-
-# 限流配置
-rate-limit:
-  # 登录限流
-  login:
-    max-attempts: 5
-    lock-minutes: 15
-    per-minute: 10
-
-  # 注册限流
-  register:
-    per-ip: 3
-    per-email: 5
-
-  # API 限流
-  api:
-    requests-per-second: 100
-    burst-capacity: 200
-
-# 验证码配置
-verification:
-  code-length: 6
-  code-expire-minutes: 5
-  max-send-times: 5
-
-# OAuth 配置
-oauth:
-  google:
-    client-id: your-google-client-id
-    client-secret: your-google-secret
-
-# 用户默认配置
-user:
-  default-status: ACTIVE
-  default-role: USER
-  max-devices-per-user: 10
