@@ -104,6 +104,7 @@ public class StrategyProperties {
         private int minPriceMoveTicks;
         private BigDecimal maxSpreadBps;
         private long minSignalHoldMs;
+        private int minConditionsToTrigger = 3;
 
         public int getTopLevels() {
             return topLevels;
@@ -159,6 +160,14 @@ public class StrategyProperties {
 
         public void setMinSignalHoldMs(long minSignalHoldMs) {
             this.minSignalHoldMs = minSignalHoldMs;
+        }
+
+        public int getMinConditionsToTrigger() {
+            return minConditionsToTrigger;
+        }
+
+        public void setMinConditionsToTrigger(int minConditionsToTrigger) {
+            this.minConditionsToTrigger = minConditionsToTrigger;
         }
     }
 

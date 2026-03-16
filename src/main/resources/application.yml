@@ -39,6 +39,7 @@ strategy:
     min-price-move-ticks: ${STRATEGY_MIN_PRICE_MOVE_TICKS:2}
     max-spread-bps: ${STRATEGY_MAX_SPREAD_BPS:20}
     min-signal-hold-ms: ${STRATEGY_MIN_SIGNAL_HOLD_MS:2000}
+    min-conditions-to-trigger: ${STRATEGY_MIN_CONDITIONS_TO_TRIGGER:3}
   risk:
     take-profit-rate: ${STRATEGY_TAKE_PROFIT_RATE:0.008}
     stop-loss-rate: ${STRATEGY_STOP_LOSS_RATE:0.005}

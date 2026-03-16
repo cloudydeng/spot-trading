@@ -8,6 +8,7 @@ import com.matching.trading.orderbook.LocalOrderBook;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Service;
 
@@ -51,12 +52,22 @@ public class SignalEngine {
         BigDecimal lastTradePrice = tradeSignalState.lastTradePrice();
 
         boolean breakout = lastTradePrice.compareTo(breakoutPrice) >= 0;
-        boolean signal = imbalance.compareTo(strategyProperties.getSignal().getImbalanceThreshold()) >= 0
-            && aggressiveBuyRatio.compareTo(strategyProperties.getSignal().getAggressiveBuyRatioThreshold()) >= 0
-            && spreadBps.compareTo(strategyProperties.getSignal().getMaxSpreadBps()) <= 0
-            && breakout;
+        boolean imbalanceMatched = imbalance.compareTo(strategyProperties.getSignal().getImbalanceThreshold()) >= 0;
+        boolean aggressiveMatched =
+            aggressiveBuyRatio.compareTo(strategyProperties.getSignal().getAggressiveBuyRatioThreshold()) >= 0;
+        boolean spreadMatched = spreadBps.compareTo(strategyProperties.getSignal().getMaxSpreadBps()) <= 0;
+        int matchedConditions = 0;
+        matchedConditions += imbalanceMatched ? 1 : 0;
+        matchedConditions += aggressiveMatched ? 1 : 0;
+        matchedConditions += spreadMatched ? 1 : 0;
+        matchedConditions += breakout ? 1 : 0;
 
-        String reason = signal ? "buy pressure confirmed" : "threshold not met";
+        int requiredConditions = Math.max(1, Math.min(4, strategyProperties.getSignal().getMinConditionsToTrigger()));
+        boolean signal = matchedConditions >= requiredConditions;
+
+        String reason = signal
+            ? "buy pressure confirmed (" + matchedConditions + "/4 conditions matched)"
+            : buildFailureReason(requiredConditions, matchedConditions, imbalanceMatched, aggressiveMatched, spreadMatched, breakout);
         return new SignalSnapshot(true, signal, imbalance, aggressiveBuyRatio, spreadBps, breakoutPrice,
             lastTradePrice, reason);
     }
@@ -67,5 +78,30 @@ public class SignalEngine {
             total = total.add(level.quantity(), MC);
         }
         return total;
+    }
+
+    private String buildFailureReason(
+        int requiredConditions,
+        int matchedConditions,
+        boolean imbalanceMatched,
+        boolean aggressiveMatched,
+        boolean spreadMatched,
+        boolean breakout
+    ) {
+        List<String> missingConditions = new ArrayList<>();
+        if (!imbalanceMatched) {
+            missingConditions.add("imbalance");
+        }
+        if (!aggressiveMatched) {
+            missingConditions.add("aggressive_buy");
+        }
+        if (!spreadMatched) {
+            missingConditions.add("spread");
+        }
+        if (!breakout) {
+            missingConditions.add("breakout");
+        }
+        return matchedConditions + "/4 conditions matched; need " + requiredConditions + "/4. Missing: "
+            + String.join(", ", missingConditions);
     }
 }
