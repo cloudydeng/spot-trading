@@ -74,7 +74,6 @@ public class TradeEngine {
         } catch (Exception e) {
             log.warn("Failed to load exchange filters during startup; strategy will stay conservative until retry", e);
         }
-        userDataStreamService.startIfNeeded();
     }
 
     @Scheduled(fixedDelay = 1000L)
