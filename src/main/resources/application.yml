@@ -23,7 +23,7 @@ binance:
 
 strategy:
   enabled: ${STRATEGY_ENABLED:true}
-  live-trading: ${STRATEGY_LIVE_TRADING:false}
+  live-trading: ${STRATEGY_LIVE_TRADING:true}
   execution:
     order-type: ${STRATEGY_ORDER_TYPE:MARKET}
     quote-amount: ${STRATEGY_QUOTE_AMOUNT:10}

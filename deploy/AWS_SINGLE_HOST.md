@@ -22,7 +22,7 @@ sudo systemctl enable spot-trading.service
 
 4. Edit `/opt/spot-trading/app.env` with real Binance credentials and keep:
 - `TRADING_STARTUP_MODE=PAPER` for first boot
-- only switch to `LIVE` by setting `STRATEGY_LIVE_TRADING=true`
+- `STRATEGY_LIVE_TRADING=true` to place real orders
 - outbound access to `api.binance.com` and `stream.binance.com:9443`
 
 5. Start and inspect:
@@ -45,7 +45,7 @@ curl http://127.0.0.1:8083/debug/orders
 7. Recommended rollout:
 - `DRY_RUN`: signal only, no position state
 - `PAPER`: simulated fills and local position lifecycle
-- `LIVE`: set `STRATEGY_LIVE_TRADING=true` and restart only after `PAPER` behavior looks correct
+- `LIVE`: set `STRATEGY_LIVE_TRADING=true` and restart
 
 8. Audit logs are written under the same log directory:
 - `app.log`
