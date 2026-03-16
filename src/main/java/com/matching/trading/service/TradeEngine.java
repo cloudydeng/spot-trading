@@ -227,7 +227,20 @@ public class TradeEngine {
             tradingAuditLogService.order("sell_order_" + reason.toLowerCase(), response);
             if (runtimeMode() == TradingProperties.StartupMode.PAPER) {
                 positionState.reduce(response.executedQty());
-                if (!positionState.isOpen()) {
+                boolean closedResidualDust = false;
+                if (positionState.isOpen()) {
+                    PositionSnapshot residual = positionState.snapshot(position.lastPrice());
+                    BigDecimal residualSellQty = exchangeRuleService.normalizeQuantity(residual.quantity(), exchangeFilters);
+                    if (residual.quantity().compareTo(BigDecimal.ZERO) > 0
+                        && residualSellQty != null
+                        && residualSellQty.compareTo(BigDecimal.ZERO) == 0) {
+                        log.info("Closing residual dust position after PAPER sell [{}]: quantity={}, filters={}",
+                            reason, residual.quantity(), exchangeFilters);
+                        positionState.close();
+                        closedResidualDust = true;
+                    }
+                }
+                if (!positionState.isOpen() || closedResidualDust) {
                     tradingRiskState.recordClosedPosition(
                         position.notional(),
                         response.cumulativeQuoteQty(),

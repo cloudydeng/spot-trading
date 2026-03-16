@@ -94,14 +94,15 @@ public class PositionState {
                 || "PARTIALLY_FILLED".equals(report.orderStatus())
                 || "CANCELED".equals(report.orderStatus())
                 || "EXPIRED".equals(report.orderStatus())) && open) {
-                BigDecimal remaining = baseQuantity.subtract(report.cumulativeFilledQuantity(), MC).max(BigDecimal.ZERO);
                 BigDecimal entryNotionalBeforeClose = notional;
-                quantity = remaining;
-                notional = entryPrice.multiply(remaining, MC);
-                if (remaining.compareTo(BigDecimal.ZERO) == 0) {
+                if ("FILLED".equals(report.orderStatus())
+                    && report.cumulativeFilledQuantity().compareTo(BigDecimal.ZERO) > 0) {
                     close();
                     return new ClosedPosition(entryNotionalBeforeClose, report.cumulativeQuoteQuantity());
                 }
+                BigDecimal remaining = baseQuantity.subtract(report.cumulativeFilledQuantity(), MC).max(BigDecimal.ZERO);
+                quantity = remaining;
+                notional = entryPrice.multiply(remaining, MC);
                 if (!"PARTIALLY_FILLED".equals(report.orderStatus())) {
                     sellOrderBaseQuantities.remove(report.orderId());
                 }

@@ -11,6 +11,7 @@ import java.time.Instant;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -202,6 +203,72 @@ class TradeEngineRiskControlTest {
         tradeEngine.evaluate();
 
         verify(paperTradingService).simulateBuy(eq("NIGHTUSDT"), eq(new BigDecimal("20")), eq(new BigDecimal("100.05")));
+    }
+
+    @Test
+    void shouldClosePaperPositionWhenSellLeavesOnlyDust() {
+        SignalEngine signalEngine = mock(SignalEngine.class);
+        BinanceRestClient restClient = mock(BinanceRestClient.class);
+        BinanceProperties binanceProperties = mock(BinanceProperties.class);
+        PaperTradingService paperTradingService = new PaperTradingService();
+        UserDataStreamService userDataStreamService = mock(UserDataStreamService.class);
+        TradingAuditLogService tradingAuditLogService = mock(TradingAuditLogService.class);
+        PositionState positionState = new PositionState();
+        ExchangeRuleService exchangeRuleService = new ExchangeRuleService();
+        TradingRiskState tradingRiskState = new TradingRiskState();
+
+        StrategyProperties strategyProperties = strategyProperties();
+        strategyProperties.getExecution().setMinExitIntervalSeconds(0);
+        strategyProperties.getRisk().setTakeProfitRate(new BigDecimal("1"));
+        strategyProperties.getRisk().setStopLossRate(new BigDecimal("1"));
+        strategyProperties.getRisk().setMaxHoldingSeconds(0);
+        TradingProperties tradingProperties = new TradingProperties();
+        tradingProperties.setStartupMode(TradingProperties.StartupMode.PAPER);
+
+        ExchangeFilters filters = new ExchangeFilters(
+            new BigDecimal("0.00001"),
+            BigDecimal.ONE,
+            BigDecimal.ONE,
+            BigDecimal.ONE
+        );
+        when(restClient.fetchExchangeFilters()).thenReturn(filters);
+        when(binanceProperties.getSymbol()).thenReturn("NIGHTUSDT");
+        when(signalEngine.snapshot()).thenReturn(new SignalSnapshot(
+            true,
+            false,
+            new BigDecimal("2.0"),
+            new BigDecimal("2.0"),
+            new BigDecimal("5"),
+            new BigDecimal("0.05090"),
+            new BigDecimal("0.05100"),
+            "timeout"
+        ));
+
+        positionState.open(
+            new BigDecimal("196.0784313725490"),
+            new BigDecimal("10.0000"),
+            new BigDecimal("0.05100"),
+            Instant.now().minusSeconds(5)
+        );
+
+        TradeEngine tradeEngine = new TradeEngine(
+            signalEngine,
+            restClient,
+            binanceProperties,
+            strategyProperties,
+            tradingProperties,
+            positionState,
+            paperTradingService,
+            exchangeRuleService,
+            userDataStreamService,
+            tradingAuditLogService,
+            tradingRiskState
+        );
+
+        assertDoesNotThrow(tradeEngine::init);
+        tradeEngine.evaluate();
+
+        assertFalse(positionState.isOpen());
     }
 
     private StrategyProperties strategyProperties() {
