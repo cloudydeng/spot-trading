@@ -26,7 +26,7 @@ strategy:
   live-trading: ${STRATEGY_LIVE_TRADING:false}
   execution:
     order-type: ${STRATEGY_ORDER_TYPE:MARKET}
-    quote-amount: ${STRATEGY_QUOTE_AMOUNT:10}
+    quote-amount: ${STRATEGY_QUOTE_AMOUNT:5.5}
     max-position-usdt: ${STRATEGY_MAX_POSITION_USDT:10}
     cooldown-seconds: ${STRATEGY_COOLDOWN_SECONDS:20}
     max-orders-per-minute: ${STRATEGY_MAX_ORDERS_PER_MINUTE:2}
@@ -54,7 +54,7 @@ orderbook:
   log-top-levels: ${ORDERBOOK_LOG_TOP_LEVELS:5}
 
 trading:
-  startup-mode: ${TRADING_STARTUP_MODE:PAPER}
+  startup-mode: ${TRADING_STARTUP_MODE:LIVE}
   cancel-open-orders-on-startup: ${TRADING_CANCEL_OPEN_ORDERS_ON_STARTUP:false}
   cancel-open-orders-on-shutdown: ${TRADING_CANCEL_OPEN_ORDERS_ON_SHUTDOWN:false}
   api:
