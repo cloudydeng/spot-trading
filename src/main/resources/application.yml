@@ -26,25 +26,25 @@ strategy:
   live-trading: ${STRATEGY_LIVE_TRADING:false}
   execution:
     order-type: ${STRATEGY_ORDER_TYPE:MARKET}
-    quote-amount: ${STRATEGY_QUOTE_AMOUNT:20}
-    max-position-usdt: ${STRATEGY_MAX_POSITION_USDT:100}
-    cooldown-seconds: ${STRATEGY_COOLDOWN_SECONDS:10}
-    max-orders-per-minute: ${STRATEGY_MAX_ORDERS_PER_MINUTE:6}
-    min-exit-interval-seconds: ${STRATEGY_MIN_EXIT_INTERVAL_SECONDS:2}
+    quote-amount: ${STRATEGY_QUOTE_AMOUNT:10}
+    max-position-usdt: ${STRATEGY_MAX_POSITION_USDT:10}
+    cooldown-seconds: ${STRATEGY_COOLDOWN_SECONDS:20}
+    max-orders-per-minute: ${STRATEGY_MAX_ORDERS_PER_MINUTE:2}
+    min-exit-interval-seconds: ${STRATEGY_MIN_EXIT_INTERVAL_SECONDS:3}
   signal:
     top-levels: ${STRATEGY_SIGNAL_TOP_LEVELS:5}
-    imbalance-threshold: ${STRATEGY_IMBALANCE_THRESHOLD:1.6}
-    aggressive-buy-ratio-threshold: ${STRATEGY_AGGRESSIVE_BUY_RATIO_THRESHOLD:1.7}
-    breakout-window-seconds: ${STRATEGY_BREAKOUT_WINDOW_SECONDS:15}
-    min-price-move-ticks: ${STRATEGY_MIN_PRICE_MOVE_TICKS:2}
-    max-spread-bps: ${STRATEGY_MAX_SPREAD_BPS:20}
-    min-signal-hold-ms: ${STRATEGY_MIN_SIGNAL_HOLD_MS:2000}
+    imbalance-threshold: ${STRATEGY_IMBALANCE_THRESHOLD:1.12}
+    aggressive-buy-ratio-threshold: ${STRATEGY_AGGRESSIVE_BUY_RATIO_THRESHOLD:1.03}
+    breakout-window-seconds: ${STRATEGY_BREAKOUT_WINDOW_SECONDS:8}
+    min-price-move-ticks: ${STRATEGY_MIN_PRICE_MOVE_TICKS:0}
+    max-spread-bps: ${STRATEGY_MAX_SPREAD_BPS:6}
+    min-signal-hold-ms: ${STRATEGY_MIN_SIGNAL_HOLD_MS:0}
     min-conditions-to-trigger: ${STRATEGY_MIN_CONDITIONS_TO_TRIGGER:3}
   risk:
-    take-profit-rate: ${STRATEGY_TAKE_PROFIT_RATE:0.008}
-    stop-loss-rate: ${STRATEGY_STOP_LOSS_RATE:0.005}
-    max-holding-seconds: ${STRATEGY_MAX_HOLDING_SECONDS:60}
-    max-consecutive-losses: ${STRATEGY_MAX_CONSECUTIVE_LOSSES:3}
+    take-profit-rate: ${STRATEGY_TAKE_PROFIT_RATE:0.0035}
+    stop-loss-rate: ${STRATEGY_STOP_LOSS_RATE:0.0025}
+    max-holding-seconds: ${STRATEGY_MAX_HOLDING_SECONDS:25}
+    max-consecutive-losses: ${STRATEGY_MAX_CONSECUTIVE_LOSSES:2}
     pause-minutes-after-loss-limit: ${STRATEGY_PAUSE_MINUTES_AFTER_LOSS_LIMIT:30}
 
 orderbook:
@@ -54,7 +54,7 @@ orderbook:
   log-top-levels: ${ORDERBOOK_LOG_TOP_LEVELS:5}
 
 trading:
-  startup-mode: ${TRADING_STARTUP_MODE:DRY_RUN}
+  startup-mode: ${TRADING_STARTUP_MODE:PAPER}
   cancel-open-orders-on-startup: ${TRADING_CANCEL_OPEN_ORDERS_ON_STARTUP:false}
   cancel-open-orders-on-shutdown: ${TRADING_CANCEL_OPEN_ORDERS_ON_SHUTDOWN:false}
   api:
