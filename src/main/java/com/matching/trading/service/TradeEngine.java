@@ -36,6 +36,7 @@ public class TradeEngine {
     private final AtomicReference<Instant> lastExitTime = new AtomicReference<>(Instant.EPOCH);
     private final AtomicReference<Instant> apiCooldownUntil = new AtomicReference<>(Instant.EPOCH);
     private final AtomicReference<Instant> signalDetectedAt = new AtomicReference<>(Instant.EPOCH);
+    private final AtomicReference<String> lastSkipReason = new AtomicReference<>("");
 
     private volatile ExchangeFilters exchangeFilters;
 
@@ -83,7 +84,9 @@ public class TradeEngine {
             return;
         }
 
-        if (apiCooldownUntil.get().isAfter(now)) {
+        Instant cooldownUntil = apiCooldownUntil.get();
+        if (cooldownUntil.isAfter(now)) {
+            logSkipReason("entry api cooldown until " + cooldownUntil);
             return;
         }
 
@@ -99,51 +102,64 @@ public class TradeEngine {
         SignalSnapshot snapshot = signalEngine.snapshot();
         if (!snapshot.ready()) {
             signalDetectedAt.set(Instant.EPOCH);
+            logSkipReason("entry waiting for order book readiness");
             return;
         }
 
         if (positionState.isOpen()) {
             signalDetectedAt.set(Instant.EPOCH);
+            clearSkipReason();
             manageOpenPosition(snapshot, now);
             return;
         }
 
         if (tradingRiskState.isEntryPaused(now)) {
+            logSkipReason("entry paused until " + tradingRiskState.pausedUntil()
+                + " after " + tradingRiskState.consecutiveLosses() + " consecutive losses");
             return;
         }
 
         if (!snapshot.buyPressureDetected()) {
             signalDetectedAt.set(Instant.EPOCH);
+            logSkipReason("entry signal not triggered: " + snapshot.reason());
             return;
         }
 
         if (!meetsMinimumBreakoutMove(snapshot)) {
             signalDetectedAt.set(Instant.EPOCH);
+            logSkipReason("entry waiting for min breakout move: lastTradePrice="
+                + snapshot.lastTradePrice() + ", breakoutPrice=" + snapshot.breakoutPrice());
             return;
         }
 
         if (!signalHeldLongEnough(now)) {
+            logSkipReason("entry waiting for signal hold: detectedAt=" + signalDetectedAt.get()
+                + ", minHoldMs=" + strategyProperties.getSignal().getMinSignalHoldMs());
             return;
         }
 
-        if (lastOrderTime.get().plusSeconds(strategyProperties.getExecution().getCooldownSeconds()).isAfter(now)) {
+        Instant nextEntryTime = lastOrderTime.get().plusSeconds(strategyProperties.getExecution().getCooldownSeconds());
+        if (nextEntryTime.isAfter(now)) {
+            logSkipReason("entry cooldown active until " + nextEntryTime);
             return;
         }
 
         BigDecimal quoteAmount = effectiveQuoteAmount();
         if (quoteAmount == null || quoteAmount.compareTo(BigDecimal.ZERO) <= 0) {
-            log.warn("Entry skipped because effective quote amount is not positive");
+            logSkipReason("entry skipped because effective quote amount is not positive");
             return;
         }
         if (!tradingRiskState.canSubmitEntryOrder(now, strategyProperties.getExecution().getMaxOrdersPerMinute())) {
-            log.warn("Entry skipped because maxOrdersPerMinute={} was reached",
-                strategyProperties.getExecution().getMaxOrdersPerMinute());
+            logSkipReason("entry skipped because maxOrdersPerMinute="
+                + strategyProperties.getExecution().getMaxOrdersPerMinute()
+                + " was reached; recentEntryOrders=" + tradingRiskState.recentEntryOrderCount(now));
             return;
         }
         if (exchangeFilters != null
             && exchangeFilters.minNotional() != null
             && quoteAmount.compareTo(exchangeFilters.minNotional()) < 0) {
-            log.warn("Quote amount {} is below exchange min notional {}", quoteAmount, exchangeFilters.minNotional());
+            logSkipReason("entry quote amount " + quoteAmount
+                + " is below exchange min notional " + exchangeFilters.minNotional());
             return;
         }
         BigDecimal estimatedBuyQty = exchangeRuleService.normalizeQuantity(
@@ -151,9 +167,11 @@ public class TradeEngine {
             exchangeFilters
         );
         if (!exchangeRuleService.isSellQuantityValid(estimatedBuyQty, snapshot.lastTradePrice(), exchangeFilters)) {
-            log.warn("Buy skipped: estimated quantity {} cannot satisfy later sell rules at price {}", estimatedBuyQty, snapshot.lastTradePrice());
+            logSkipReason("entry skipped because estimated quantity " + estimatedBuyQty
+                + " cannot satisfy later sell rules at price " + snapshot.lastTradePrice());
             return;
         }
+        clearSkipReason();
         tradingAuditLogService.signal("buy_signal", snapshot);
 
         if (runtimeMode() == TradingProperties.StartupMode.DRY_RUN) {
@@ -309,5 +327,16 @@ public class TradeEngine {
             return maxPositionUsdt;
         }
         return quoteAmount;
+    }
+
+    private void logSkipReason(String reason) {
+        String previousReason = lastSkipReason.getAndSet(reason);
+        if (!reason.equals(previousReason)) {
+            log.info("Entry blocked: {}", reason);
+        }
+    }
+
+    private void clearSkipReason() {
+        lastSkipReason.set("");
     }
 }
