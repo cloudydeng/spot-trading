@@ -28,23 +28,23 @@ strategy:
     order-type: ${STRATEGY_ORDER_TYPE:MARKET}
     quote-amount: ${STRATEGY_QUOTE_AMOUNT:5.5}
     max-position-usdt: ${STRATEGY_MAX_POSITION_USDT:10}
-    cooldown-seconds: ${STRATEGY_COOLDOWN_SECONDS:20}
-    max-orders-per-minute: ${STRATEGY_MAX_ORDERS_PER_MINUTE:2}
+    cooldown-seconds: ${STRATEGY_COOLDOWN_SECONDS:10}
+    max-orders-per-minute: ${STRATEGY_MAX_ORDERS_PER_MINUTE:6}
     min-exit-interval-seconds: ${STRATEGY_MIN_EXIT_INTERVAL_SECONDS:3}
   signal:
     top-levels: ${STRATEGY_SIGNAL_TOP_LEVELS:5}
     imbalance-threshold: ${STRATEGY_IMBALANCE_THRESHOLD:1.12}
     aggressive-buy-ratio-threshold: ${STRATEGY_AGGRESSIVE_BUY_RATIO_THRESHOLD:1.03}
     breakout-window-seconds: ${STRATEGY_BREAKOUT_WINDOW_SECONDS:8}
-    min-price-move-ticks: ${STRATEGY_MIN_PRICE_MOVE_TICKS:0}
+    min-price-move-ticks: ${STRATEGY_MIN_PRICE_MOVE_TICKS:3}
     max-spread-bps: ${STRATEGY_MAX_SPREAD_BPS:6}
-    min-signal-hold-ms: ${STRATEGY_MIN_SIGNAL_HOLD_MS:0}
-    min-conditions-to-trigger: ${STRATEGY_MIN_CONDITIONS_TO_TRIGGER:3}
+    min-signal-hold-ms: ${STRATEGY_MIN_SIGNAL_HOLD_MS:5000}
+    min-conditions-to-trigger: ${STRATEGY_MIN_CONDITIONS_TO_TRIGGER:4}
   risk:
-    take-profit-rate: ${STRATEGY_TAKE_PROFIT_RATE:0.0035}
-    stop-loss-rate: ${STRATEGY_STOP_LOSS_RATE:0.0025}
-    max-holding-seconds: ${STRATEGY_MAX_HOLDING_SECONDS:25}
-    max-consecutive-losses: ${STRATEGY_MAX_CONSECUTIVE_LOSSES:2}
+    take-profit-rate: ${STRATEGY_TAKE_PROFIT_RATE:0.006}
+    stop-loss-rate: ${STRATEGY_STOP_LOSS_RATE:0.004}
+    max-holding-seconds: ${STRATEGY_MAX_HOLDING_SECONDS:90}
+    max-consecutive-losses: ${STRATEGY_MAX_CONSECUTIVE_LOSSES:0}
     pause-minutes-after-loss-limit: ${STRATEGY_PAUSE_MINUTES_AFTER_LOSS_LIMIT:30}
 
 orderbook:
