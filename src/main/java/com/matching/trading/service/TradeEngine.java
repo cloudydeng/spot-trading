@@ -196,6 +196,8 @@ public class TradeEngine {
         } catch (BinanceApiException e) {
             applyApiCooldownIfNeeded(e);
             log.warn("BUY order rejected: {}", e.getMessage());
+        } catch (RuntimeException e) {
+            log.warn("BUY order failed in mode {}: {}", runtimeMode(), e.getMessage());
         }
     }
 
@@ -273,6 +275,8 @@ public class TradeEngine {
         } catch (BinanceApiException e) {
             applyApiCooldownIfNeeded(e);
             log.warn("SELL order rejected: {}", e.getMessage());
+        } catch (RuntimeException e) {
+            log.warn("SELL order failed in mode {}: {}", runtimeMode(), e.getMessage());
         }
     }
 

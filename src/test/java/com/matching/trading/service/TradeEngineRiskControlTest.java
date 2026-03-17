@@ -271,6 +271,61 @@ class TradeEngineRiskControlTest {
         assertFalse(positionState.isOpen());
     }
 
+    @Test
+    void shouldNotAbortEvaluationWhenLiveBuyFailsUnexpectedly() {
+        SignalEngine signalEngine = mock(SignalEngine.class);
+        BinanceRestClient restClient = mock(BinanceRestClient.class);
+        BinanceProperties binanceProperties = mock(BinanceProperties.class);
+        PaperTradingService paperTradingService = mock(PaperTradingService.class);
+        UserDataStreamService userDataStreamService = mock(UserDataStreamService.class);
+        TradingAuditLogService tradingAuditLogService = mock(TradingAuditLogService.class);
+        PositionState positionState = new PositionState();
+        ExchangeRuleService exchangeRuleService = new ExchangeRuleService();
+        TradingRiskState tradingRiskState = new TradingRiskState();
+
+        StrategyProperties strategyProperties = strategyProperties();
+        TradingProperties tradingProperties = new TradingProperties();
+        tradingProperties.setStartupMode(TradingProperties.StartupMode.LIVE);
+
+        ExchangeFilters filters = new ExchangeFilters(
+            new BigDecimal("0.01"),
+            new BigDecimal("0.01"),
+            new BigDecimal("0.10"),
+            new BigDecimal("5")
+        );
+        when(restClient.fetchExchangeFilters()).thenReturn(filters);
+        when(signalEngine.snapshot()).thenReturn(new SignalSnapshot(
+            true,
+            true,
+            new BigDecimal("2.0"),
+            new BigDecimal("2.0"),
+            new BigDecimal("5"),
+            new BigDecimal("100.00"),
+            new BigDecimal("100.05"),
+            "buy pressure confirmed"
+        ));
+        when(restClient.placeMarketBuy(eq(new BigDecimal("20"))))
+            .thenThrow(new IllegalStateException("Binance API credentials are not configured"));
+
+        TradeEngine tradeEngine = new TradeEngine(
+            signalEngine,
+            restClient,
+            binanceProperties,
+            strategyProperties,
+            tradingProperties,
+            positionState,
+            paperTradingService,
+            exchangeRuleService,
+            userDataStreamService,
+            tradingAuditLogService,
+            tradingRiskState
+        );
+
+        assertDoesNotThrow(tradeEngine::init);
+        assertDoesNotThrow(tradeEngine::evaluate);
+        assertFalse(positionState.isOpen());
+    }
+
     private StrategyProperties strategyProperties() {
         StrategyProperties strategyProperties = new StrategyProperties();
         strategyProperties.setEnabled(true);
