@@ -10,6 +10,7 @@ import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication(
     scanBasePackages = "com.matching.trading",
@@ -25,6 +26,7 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
     OrderBookProperties.class,
     TradingProperties.class
 })
+@EnableScheduling
 public class TradingApplication {
     public static void main(String[] args) {
         SpringApplication.run(TradingApplication.class, args);

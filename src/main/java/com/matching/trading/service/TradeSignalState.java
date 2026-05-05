@@ -44,10 +44,12 @@ public class TradeSignalState {
     }
 
     public synchronized BigDecimal breakoutReference(long breakoutWindowMs) {
-        long threshold = System.currentTimeMillis() - breakoutWindowMs;
+        long now = System.currentTimeMillis();
+        long threshold = now - breakoutWindowMs;
         BigDecimal max = BigDecimal.ZERO;
         for (TradeTick tick : recentTrades) {
-            if (tick.eventTime() < threshold) {
+            long eventTime = tick.eventTime();
+            if (eventTime < threshold || eventTime >= now) {
                 continue;
             }
             if (tick.price().compareTo(max) > 0) {

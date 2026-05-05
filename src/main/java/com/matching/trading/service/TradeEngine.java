@@ -316,7 +316,12 @@ public class TradeEngine {
             return true;
         }
         BigDecimal requiredMove = exchangeFilters.tickSize().multiply(BigDecimal.valueOf(minPriceMoveTicks));
-        BigDecimal actualMove = snapshot.lastTradePrice().subtract(snapshot.breakoutPrice());
+        BigDecimal breakoutPrice = snapshot.breakoutPrice();
+        BigDecimal lastTradePrice = snapshot.lastTradePrice();
+        if (breakoutPrice == null || lastTradePrice == null) {
+            return false;
+        }
+        BigDecimal actualMove = lastTradePrice.subtract(breakoutPrice);
         return actualMove.compareTo(requiredMove) >= 0;
     }
 

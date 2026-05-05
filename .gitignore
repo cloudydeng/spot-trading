@@ -2,6 +2,7 @@ target/
 *.jar
 *.war
 *.class
+logs/
 
 .idea/
 *.iml
